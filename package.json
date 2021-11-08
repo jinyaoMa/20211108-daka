@@ -1,0 +1,24 @@
+{
+  "name": "gin-systray-starter",
+  "version": "1.0.0",
+  "description": "Template/Starter code for Go application with Gin, System Tray, Gorm, Air, Swagger, JWT",
+  "scripts": {
+    "serve": "air -c air/.air.toml",
+    "swag": "swag init -g server/api.go -o ./swagger",
+    "build:run": "go build -o ./main.exe . && main",
+    "build": "go build -tags=jsoniter -ldflags \"-H=windowsgui\" -o ./main.exe ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jinyaoMa/gin-systray-starter.git"
+  },
+  "author": "jinyaoMa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jinyaoMa/gin-systray-starter/issues"
+  },
+  "homepage": "https://github.com/jinyaoMa/gin-systray-starter#readme",
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}

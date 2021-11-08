@@ -1,0 +1,79 @@
+info:
+  contact:
+    name: Github Issues
+    url: https://github.com/jinyaoMa/gin-systray-starter/issues
+  description: '"Starter code for Go application with Gin, System Tray, Gorm, Air,
+    Swagger"'
+  license:
+    name: MIT
+    url: https://github.com/jinyaoMa/gin-systray-starter/blob/main/LICENSE
+  title: gin-systray-starter
+  version: 1.0.0
+paths:
+  /test/:
+    get:
+      consumes:
+      - text/plain
+      description: Test Controller
+      parameters:
+      - description: Msg
+        in: query
+        name: msg
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ ok , data }'
+        "400":
+          description: binding error
+        "404":
+          description: '{ error }'
+      summary: TestController
+      tags:
+      - Before Authorization
+  /test/checkToken/:
+    get:
+      consumes:
+      - text/plain
+      description: Test Jwt, check token
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ ok , claims }'
+        "401":
+          description: Auth failed
+        "404":
+          description: '{ error }'
+      security:
+      - BearerIdAuth: []
+      summary: TestJwtCheckToken
+      tags:
+      - After Authorization
+  /test/getToken/:
+    get:
+      consumes:
+      - text/plain
+      description: Test Jwt, get token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ ok , token }'
+        "404":
+          description: '{ error }'
+      summary: TestJwtGetToken
+      tags:
+      - Before Authorization
+securityDefinitions:
+  BearerIdAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
