@@ -30,40 +30,6 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/test/": {
-            "get": {
-                "description": "Test Controller",
-                "consumes": [
-                    "text/plain"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Before Authorization"
-                ],
-                "summary": "TestController",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Msg",
-                        "name": "msg",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{ ok , data }"
-                    },
-                    "400": {
-                        "description": "binding error"
-                    },
-                    "404": {
-                        "description": "{ error }"
-                    }
-                }
-            }
-        },
         "/test/checkToken/": {
             "get": {
                 "security": [
