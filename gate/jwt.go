@@ -8,6 +8,9 @@ import (
 
 type Claims struct {
 	jwt.RegisteredClaims
+	UserID   uint
+	StoreID  int
+	Usertype string
 }
 
 var DEFAULT_SIGNING_KEY = []byte("secret key")

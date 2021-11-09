@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,10 +20,21 @@ func Start(withSwagger bool) {
 	HasSwagger = withSwagger
 
 	router = gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AddAllowHeaders("Authorization")
+	router.Use(cors.New(config))
+
+	router.StaticFile("/", "./client/dist/index.html")
+	router.Static("/css", "./client/dist/css")
+	router.Static("/fonts", "./client/dist/fonts")
+	router.Static("/js", "./client/dist/js")
+
 	Apis(router, HasSwagger)
 
 	server = &http.Server{
-		Addr:    ":8080",
+		Addr:    ":8081",
 		Handler: router,
 	}
 

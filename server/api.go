@@ -25,7 +25,9 @@ import (
 // @name Authorization
 
 func Apis(engine *gin.Engine, withSwagger bool) {
-	routers.TestRouter(engine)
+	routers.Auth(engine)
+	routers.Stores(engine)
+	routers.Timesheet(engine)
 
 	if withSwagger {
 		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -2,10 +2,10 @@ root = "."
 tmp_dir = "air"
 
 [build]
-  bin = "air\\main -dev 1 ."
+  bin = "air\\main -dev 1 -tray 0 ."
   cmd = "go build -o ./air/main.exe ."
   delay = 1000
-  exclude_dir = ["assets", "air", "vendor"]
+  exclude_dir = ["assets", "air", "vendor", "client", ".vscode", ".git"]
   exclude_file = []
   exclude_regex = []
   exclude_unchanged = false

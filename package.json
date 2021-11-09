@@ -6,7 +6,9 @@
     "serve": "air -c air/.air.toml",
     "swag": "swag init -g server/api.go -o ./swagger",
     "build:run": "go build -o ./main.exe . && main",
-    "build": "go build -tags=jsoniter -ldflags \"-H=windowsgui\" -o ./main.exe ."
+    "build": "go build -tags=jsoniter -ldflags \"-H=windowsgui\" -o ./main.exe .",
+    "serve:all": "cd client && npm run serve && cd ../ && npm run serve",
+    "build:all": "cd client && npm run build && cd ../ && npm run build"
   },
   "repository": {
     "type": "git",

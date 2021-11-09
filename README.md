@@ -1,73 +1,32 @@
-# gin-systray-starter
+# 前后端开发环境
 
-Template/Starter code for Go application with Gin, System Tray, Gorm, Air, Swagger, JWT
+- Node [https://nodejs.org/dist/v16.13.0/node-v16.13.0-x64.msi](https://nodejs.org/dist/v16.13.0/node-v16.13.0-x64.msi)
+- Go [https://golang.org/dl/go1.17.3.windows-amd64.msi](https://golang.org/dl/go1.17.3.windows-amd64.msi)
 
-- [x] systray, [https://github.com/getlantern/systray](https://github.com/getlantern/systray)
-- [x] gin, [https://github.com/gin-gonic/gin](https://github.com/gin-gonic/gin)
-- [x] air, [https://github.com/cosmtrek/air](https://github.com/cosmtrek/air)
-- [x] gorm, [https://gorm.io/](https://gorm.io/)
-- [x] swagger, [https://github.com/swaggo/gin-swagger](https://github.com/swaggo/gin-swagger)
-- [x] jwt, [https://github.com/golang-jwt/jwt](https://github.com/golang-jwt/jwt)
+# 数据库
 
-## System
+`/database/init.go`
 
-- Windows 10
-- Go 1.17
-- Npm v8
+  - `MAIN` - 登录 user 表
+  - `STORES` - 所有店铺链接
+  - `OFFICE_EXCEPT_INDEX` - Office 用户不能用的链接，对应`STORES`下标
 
-## Setup
+# 网站端口修改
 
-``` bash
-# install air cli
-curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
-# install swag cli
-go install github.com/swaggo/swag/cmd/swag@latest
-# install go dependencies
-go mod tidy
-```
+`/client/src/main.js`
 
-## Npm Scripts
+  - `axios.defaults.baseURL = "http://localhost:8081"` - 替换 8081
 
-Run only the http server with air hot reload,
+`/server/init.go`
 
-```
-npm run serve
-```
+  - `Addr: ":8081",` - 替换 8081
 
-Re-generate swagger configuration (do this when APIs changed)
+# 测试
 
-```
-npm run swag
-```
+- 运行`npm run serve:all`
+- 浏览器打开：`http://localhost:8080`
 
-Build and run the project (without flags)
+# 部署
 
-```
-npm run build:run
-```
-
-Build the project (with flags, `-tags=jsoniter -ldflags "-H=windowsgui"`)
-
-```
-npm run build
-```
-
-## Structure
-
-- /air `air configuration and temporary output files`
-  - .air.toml `air cli config`
-- /database `init database connection`
-  - /models `map database structure && provide CRUD for each table`
-- /gate `authentication tools`
-- /server `init http server`
-  - /controllers `actions for each API (request -> services -> response)`
-  - /middlewares `hooks/filters/interceptors`
-    - auth.go `authentication gateway with jwt`
-  - /routers `groups of APIs`
-  - /services `services (involve multiple models) to be used in actions`
-  - api.go `swag General API annotations with a set of API routers/groups`
-- /swagger `auto-generated swagger configuration`
-- /tray `init system tray`
-  - /icons `icons for the tray and menu items`
-  - /locales `language files for the tray`
-- main.go `app entry`
+- 运行`npm run build:all`
+- 确保`/client`文件夹和`main.exe`执行文件在同一目录下，运行`main.exe`

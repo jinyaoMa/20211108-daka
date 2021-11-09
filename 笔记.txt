@@ -1,0 +1,44 @@
+来了，我先给你导入mysql
+Port 要改成33068
+
+
+Table: usertype
+只需要关注三个，admin,office，account
+Admin, 所有的ip地址都可以连接
+office, 除了其中一个IP地址，剩下的都可以连接
+account,只能看，不能改。但是可以导出EXCEL表格（我之后给你）
+
+Table：user
+只需要管username，password,usertype(用来授权)，其他的不管
+
+Tbale：timesheet
+id, 自动生成
+userid,match user
+signintime1,signouttime1,total. 网站只管这三个（update）
+
+EXCEL
+
+大概就是这么个意思，不一定一模一样，大概的格式能保持住就行。
+Day1 是周日， 所有是SUN- SAT
+
+先只考虑2周导出一个表的情况，如果code的继承性比较强，可以考虑再加个1周和4周
+
+
+有问题吗？
+
+这个total是一周的是吧？
+上面有几周，就是几周的总和
+ok
+放在中间比较好理解
+
+
+
+别的问题？
+那些链接现在需要弄上去吗
+那些链接你可能得做一个表或者一个config文件，storename 对应的连接串
+连接串只能我来后加上去，这个不能给别人看.......
+ok
+Login的user和timesheet的user是两个表，他们的结构一模一样
+Login user 是授权登录用的， 连接串之后的user表是为了配合timesheet用的
+
+
