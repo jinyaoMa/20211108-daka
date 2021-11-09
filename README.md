@@ -3,28 +3,25 @@
 - Node [https://nodejs.org/dist/v16.13.0/node-v16.13.0-x64.msi](https://nodejs.org/dist/v16.13.0/node-v16.13.0-x64.msi)
 - Go [https://golang.org/dl/go1.17.3.windows-amd64.msi](https://golang.org/dl/go1.17.3.windows-amd64.msi)
 
+# 测试
+
+- 运行`npm run setup:all`
+- 运行`npm run serve:all`
+- 浏览器打开：`http://localhost:8080`
+
 # 数据库
 
-`/database/init.go`
-
+- `/database/init.go`
   - `MAIN` - 登录 user 表
   - `STORES` - 所有店铺链接
   - `OFFICE_EXCEPT_INDEX` - Office 用户不能用的链接，对应`STORES`下标
 
 # 网站端口修改
 
-`/client/src/main.js`
-
+- `/client/src/main.js`
   - `axios.defaults.baseURL = "http://localhost:8081"` - 替换 8081
-
-`/server/init.go`
-
+- `/server/init.go`
   - `Addr: ":8081",` - 替换 8081
-
-# 测试
-
-- 运行`npm run serve:all`
-- 浏览器打开：`http://localhost:8080`
 
 # 部署
 
