@@ -11,6 +11,7 @@ import (
 )
 
 type UpdateTimesheetForm struct {
+	StoreID     int       `form:"StoreID"`
 	ID          uint      `form:"ID" binding:"required"`
 	SigninTime  time.Time `form:"SigninTime" binding:"required"`
 	SignoutTime time.Time `form:"SignoutTime" binding:"required"`
@@ -24,6 +25,7 @@ type UpdateTimesheetForm struct {
 // @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
+// @param StoreID query int false "Store ID"
 // @param ID formData uint true "ID"
 // @param SigninTime formData time.Time true "SigninTime"
 // @param SignoutTime formData time.Time true "SignoutTime"
@@ -57,7 +59,7 @@ func UpdateTimesheet(c *gin.Context) {
 		return
 	}
 
-	store, ok := database.GetStore(claims.StoreID)
+	store, ok := database.GetStore(form.StoreID)
 	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Store error!",

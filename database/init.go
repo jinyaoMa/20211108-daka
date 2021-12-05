@@ -21,7 +21,7 @@ var MAIN *Store = &Store{
 var STORES = []*Store{
 	{
 		Name: "Store 0",
-		Dsn:  "root:root@tcp(127.0.0.1:7531)/loveshop0?charset=utf8mb4&parseTime=True&loc=Local",
+		Dsn:  "root:root@tcp(127.0.0.1:7531)/loveshop3?charset=utf8mb4&parseTime=True&loc=Local",
 	},
 	{
 		Name: "Store 1",

@@ -8,21 +8,17 @@
       label-position="left"
     >
       <el-form-item label="Username">
-        <el-input v-model="form.account"></el-input>
+        <el-input
+          v-model="form.account"
+          @keyup.enter.native="login()"
+        ></el-input>
       </el-form-item>
       <el-form-item label="Password">
-        <el-input v-model="form.password"></el-input>
-      </el-form-item>
-      <el-form-item label="Store">
-        <el-select v-model="form.storeId" placeholder="Choose a store">
-          <el-option
-            v-for="(store, i) in storeslist"
-            :key="i"
-            :label="store"
-            :value="i"
-          >
-          </el-option>
-        </el-select>
+        <el-input
+          type="password"
+          v-model="form.password"
+          @keyup.enter.native="login()"
+        ></el-input>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="login">Login</el-button>
@@ -39,15 +35,8 @@ export default {
       form: {
         account: "",
         password: "",
-        storeId: "",
       },
-      storeslist: [],
     };
-  },
-  mounted() {
-    this.$http.get("/stores/list").then((result) => {
-      this.storeslist = result.data.data;
-    });
   },
   methods: {
     login() {
@@ -57,15 +46,15 @@ export default {
           let data = result.data;
           this.saveUserInfo({
             token: "Bearer " + data.token,
-            store: data.data.store,
             user: data.data.user,
           });
-          this.$router.push("/");
+          this.$router.push("/store");
         })
         .catch((error) => {
           let data = error.response.data;
           this.$message.error(data.error);
         });
+      return false;
     },
   },
 };

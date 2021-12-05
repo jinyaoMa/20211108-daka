@@ -1,7 +1,18 @@
 import moment from "moment";
 
 export default {
+  data() {
+    return {
+      OFFICE_EXCEPT_INDEX: 1,
+    };
+  },
   methods: {
+    date2YMD(date) {
+      if (date) {
+        return moment(date).format("YYYY-MM-DD");
+      }
+      return "";
+    },
     data2String(date) {
       if (date) {
         return moment(date).format("YYYY-MM-DD HH:mm:ss");

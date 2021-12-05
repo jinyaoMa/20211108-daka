@@ -26,4 +26,9 @@ body {
   min-width: 320px !important;
   max-width: 100vw;
 }
+
+.el-calendar-table .el-calendar-day {
+  height: 72px !important;
+  padding: 0 !important;
+}
 </style>

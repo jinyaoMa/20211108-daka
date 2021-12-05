@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "Template/Starter code for Go application with Gin, System Tray, Gorm, Air, Swagger, JWT",
   "scripts": {
-    "serve": "air -c air/.air.toml",
+    "serve:back": "air -c air/.air.toml",
+    "serve:front": "cd client && npm run serve",
     "swag": "swag init -g server/api.go -o ./swagger",
     "build:run": "go build -o ./main.exe . && main",
     "build": "go build -tags=jsoniter -ldflags \"-H=windowsgui\" -o ./main.exe .",
     "setup:all": "cd client && npm i && cd ../ && go mod tidy",
-    "serve:all": "cd client && npm run serve && cd ../ && npm run serve",
     "build:all": "cd client && npm run build && cd ../ && npm run build"
   },
   "repository": {

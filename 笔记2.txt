@@ -1,0 +1,13 @@
+Login <> storeno
+
+select store
+0.店名
+
+	1. 日历 ＝》show(某一天)
+	2. 导出 （from ~ to）
+	
+	
+	file name:
+	 storename_startdata_enddate.xlxs
+	 
+	 Loveshop Timesheet Config Tool

@@ -30,14 +30,53 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/test/checkToken/": {
+        "/auth/login": {
+            "post": {
+                "description": "Login",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Before Authorization"
+                ],
+                "summary": "Login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account",
+                        "name": "account",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{ ok , data , token }"
+                    },
+                    "404": {
+                        "description": "{ error }"
+                    }
+                }
+            }
+        },
+        "/stores/list": {
             "get": {
                 "security": [
                     {
                         "BearerIdAuth": []
                     }
                 ],
-                "description": "Test Jwt, check token",
+                "description": "Get Stores List",
                 "consumes": [
                     "text/plain"
                 ],
@@ -45,9 +84,9 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "After Authorization"
+                    "Before Authorization"
                 ],
-                "summary": "TestJwtCheckToken",
+                "summary": "GetStoresList",
                 "parameters": [
                     {
                         "type": "string",
@@ -58,7 +97,69 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{ ok , claims }"
+                        "description": "{ ok , data }"
+                    },
+                    "404": {
+                        "description": "{ error }"
+                    }
+                }
+            }
+        },
+        "/timesheet/download": {
+            "get": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Download Excel",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "DownloadExcel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Store ID",
+                        "name": "storeId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start Date",
+                        "name": "startDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End Date",
+                        "name": "endDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Is All",
+                        "name": "all",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ".xlsx file"
                     },
                     "401": {
                         "description": "Auth failed"
@@ -69,22 +170,133 @@ var doc = `{
                 }
             }
         },
-        "/test/getToken/": {
+        "/timesheet/list": {
             "get": {
-                "description": "Test Jwt, get token",
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Get Timesheet List",
                 "consumes": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Before Authorization"
+                    "After Authorization"
                 ],
-                "summary": "TestJwtGetToken",
+                "summary": "GetTimesheetList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Store ID",
+                        "name": "storeId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Show Date",
+                        "name": "showDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order",
+                        "name": "order",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "OrderBy",
+                        "name": "orderby",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "{ ok , token }"
+                        "description": "{ ok , data , count }"
+                    },
+                    "401": {
+                        "description": "Auth failed"
+                    },
+                    "404": {
+                        "description": "{ error }"
+                    }
+                }
+            }
+        },
+        "/timesheet/update/": {
+            "post": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Update Timesheet",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "UpdateTimesheet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Store ID",
+                        "name": "StoreID",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "ID",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Total",
+                        "name": "Total",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{ ok }"
+                    },
+                    "401": {
+                        "description": "Auth failed"
                     },
                     "404": {
                         "description": "{ error }"

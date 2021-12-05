@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"this/database"
 	"this/database/models"
-	"this/gate"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +13,10 @@ import (
 )
 
 type DownloadExcelQuery struct {
-	Week int64 `form:"week" binding:"required"`
+	StoreID   int    `form:"storeId"`
+	StartDate string `form:"startDate" binding:"required"`
+	EndDate   string `form:"endDate" binding:"required"`
+	IsAll     bool   `form:"all"`
 }
 
 // @Summary DownloadExcel
@@ -24,20 +26,25 @@ type DownloadExcelQuery struct {
 // @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
-// @param week query int64 false "Week Count"
+// @param storeId query int false "Store ID"
+// @param startDate query string true "Start Date"
+// @param endDate query string true "End Date"
+// @param all query bool false "Is All"
 // @Success 200 ".xlsx file"
 // @Failure 401 "Auth failed"
 // @Failure 404 "{ error }"
 // @Router /timesheet/download [get]
 func DownloadExcel(c *gin.Context) {
-	temp, exists := c.Get("claims")
-	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Middleware Auth not exists!",
-		})
-		return
-	}
-	claims := temp.(*gate.Claims)
+	/*
+		temp, exists := c.Get("claims")
+		if !exists {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "Middleware Auth not exists!",
+			})
+			return
+		}
+		claims := temp.(*gate.Claims)
+	*/
 
 	var form DownloadExcelQuery
 	if c.ShouldBind(&form) != nil {
@@ -47,7 +54,7 @@ func DownloadExcel(c *gin.Context) {
 		return
 	}
 
-	store, ok := database.GetStore(claims.StoreID)
+	store, ok := database.GetStore(form.StoreID)
 	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Store error!",
@@ -55,8 +62,20 @@ func DownloadExcel(c *gin.Context) {
 		return
 	}
 
+	if form.IsAll {
+		form.StartDate = "1000-01-01"
+		form.EndDate = "9999-12-31"
+	}
+
 	var timesheet *models.Timesheet
-	list, err := timesheet.GetListForExcel(*store)
+	excelTotals, err := timesheet.GetTotalForExcelWithRange(*store, form.StartDate, form.EndDate)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Timesheet error!",
+		})
+		return
+	}
+	list, err := timesheet.GetListForExcelWithRange(*store, form.StartDate, form.EndDate)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Timesheet error!",
@@ -65,8 +84,15 @@ func DownloadExcel(c *gin.Context) {
 	}
 
 	f := excelize.NewFile()
-	makeExcel(f, list, form.Week)
-	if err := f.SaveAs("export.xlsx"); err != nil {
+	makeExcelTotal(f, excelTotals)
+	makeExcelNewSheet(f, list)
+
+	filename := database.STORES[form.StoreID].Name + "_" + form.StartDate + "_" + form.EndDate + ".xlsx"
+	if form.IsAll {
+		filename = database.STORES[form.StoreID].Name + "_" + "all.xlsx"
+	}
+
+	if err := f.SaveAs(filename); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "file create error!",
 		})
@@ -74,9 +100,9 @@ func DownloadExcel(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", "application/octet-stream")
-	c.Header("Content-Disposition", "attachment; filename=export.xlsx")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
 	c.Header("Content-Transfer-Encoding", "binary")
-	c.File("export.xlsx")
+	c.File(filename)
 }
 
 type Subtotal struct {
@@ -84,53 +110,174 @@ type Subtotal struct {
 	Sum  float64
 }
 
-func makeExcel(f *excelize.File, list []*models.Timesheet, week int64) {
-	f.SetCellValue("Sheet1", "B1", "Username")
-	f.SetCellValue("Sheet1", "C1", "Sign In Time")
-	f.SetCellValue("Sheet1", "D1", "Sign Out Time")
-	f.SetCellValue("Sheet1", "E1", "Daily Total")
-	var current int64 = 2
-	var isBeignningSundayInit bool = false
-	var theBeignningSunday time.Time
-	var subtotals = make(map[uint]*Subtotal)
+func makeExcelTotal(f *excelize.File, excelTotals []*models.ExcelTotal) (err error) {
+	var styleTitleId int
+	styleTitleId, err = f.NewStyle(`{"font":{"bold":true},"fill":{"type":"pattern","color":["#FFFF00"],"pattern":1}}`)
+	var styleGridId int
+	styleGridId, err = f.NewStyle(`{
+		"border": [{
+			"type": "left",
+			"color": "000000",
+			"style": 4
+		},
+		{
+			"type": "top",
+			"color": "000000",
+			"style": 4
+		},
+		{
+			"type": "bottom",
+			"color": "000000",
+			"style": 4
+		},
+		{
+			"type": "right",
+			"color": "000000",
+			"style": 4
+		}]
+	}`)
+
+	f.SetSheetName("Sheet1", "Total")
+	f.SetCellValue("Total", "A1", "Name")
+	f.SetCellValue("Total", "B1", "Hours")
+	f.SetCellStyle("Total", "A1", "B1", styleTitleId)
+
+	f.SetColWidth("Total", "A", "A", 30)
+	f.SetColWidth("Total", "B", "B", 10)
+
+	var cursor int64 = 2
+	for _, row := range excelTotals {
+		f.SetCellValue("Total", "A"+strconv.FormatInt(cursor, 10), row.Name)
+		f.SetCellValue("Total", "B"+strconv.FormatInt(cursor, 10), row.Hours)
+		f.SetCellStyle("Total", "A"+strconv.FormatInt(cursor, 10), "B"+strconv.FormatInt(cursor, 10), styleGridId)
+		cursor++
+	}
+
+	return
+}
+
+func makeExcelNewSheet(f *excelize.File, list []*models.ExcelTimesheet) (err error) {
+	var weekNumber int64 = 0
+	var currentSheet string
+	var currentBeginningOfWeek time.Time
+	var currentDate time.Time
+	var currentRow int64 = 1
+	var styleGridId int
+	styleGridId, err = f.NewStyle(`{
+		"border": [{
+			"type": "left",
+			"color": "000000",
+			"style": 4
+		},
+		{
+			"type": "top",
+			"color": "000000",
+			"style": 4
+		},
+		{
+			"type": "bottom",
+			"color": "000000",
+			"style": 4
+		},
+		{
+			"type": "right",
+			"color": "000000",
+			"style": 4
+		}]
+	}`)
 	for _, row := range list {
-		if week < 0 {
-			break
+		if currentBeginningOfWeek != now.With(*row.SigninTime).BeginningOfWeek() {
+			weekNumber++
+
+			currentBeginningOfWeek = now.With(*row.SigninTime).BeginningOfWeek()
+			currentSheet = "Week " + strconv.FormatInt(weekNumber, 10)
+			f.NewSheet(currentSheet)
+
+			f.SetColWidth(currentSheet, "A", "D", 15)
+			f.SetColWidth(currentSheet, "B", "B", 30)
+			f.SetColWidth(currentSheet, "E", "E", 10)
+
+			f.SetCellValue(currentSheet, "B1", "Username")
+			f.SetCellValue(currentSheet, "C1", "Sign In Time")
+			f.SetCellValue(currentSheet, "D1", "Sign Out Time")
+			f.SetCellValue(currentSheet, "E1", "Daily Total")
+
+			var styleId int
+			styleId, err = f.NewStyle(`{
+				"font":{
+					"bold":true
+				},
+				"border": [{
+					"type": "left",
+					"color": "000000",
+					"style": 4
+				},
+				{
+					"type": "top",
+					"color": "000000",
+					"style": 4
+				},
+				{
+					"type": "bottom",
+					"color": "000000",
+					"style": 4
+				},
+				{
+					"type": "right",
+					"color": "000000",
+					"style": 4
+				}]
+			}`)
+			f.SetCellStyle(currentSheet, "B1", "E1", styleId)
+
+			currentRow = 3
 		}
-		if !isBeignningSundayInit {
-			isBeignningSundayInit = true
-			theBeignningSunday = now.With(*row.SigninTime).BeginningOfWeek()
-			f.SetCellValue("Sheet1", "A"+strconv.FormatInt(current, 10), "Week #"+strconv.FormatInt(week, 10))
-			week--
-			current++
-		}
-		if row.SigninTime.Before(theBeignningSunday) {
-			theBeignningSunday = now.With(*row.SigninTime).BeginningOfWeek()
-			f.SetCellValue("Sheet1", "A"+strconv.FormatInt(current, 10), "Week #"+strconv.FormatInt(week, 10))
-			week--
-			current++
-		}
-		f.SetCellValue("Sheet1", "A"+strconv.FormatInt(current, 10), row.SigninTime.Weekday())
-		f.SetCellValue("Sheet1", "B"+strconv.FormatInt(current, 10), row.Username)
-		f.SetCellValue("Sheet1", "C"+strconv.FormatInt(current, 10), row.SigninTime)
-		f.SetCellValue("Sheet1", "D"+strconv.FormatInt(current, 10), row.SignoutTime)
-		f.SetCellValue("Sheet1", "E"+strconv.FormatInt(current, 10), row.Total)
-		if _, ok := subtotals[row.UserID]; !ok {
-			subtotals[row.UserID] = &Subtotal{
-				Name: row.Username,
-				Sum:  row.Total,
+
+		if currentDate != now.With(*row.SigninTime).BeginningOfDay() {
+			currentDate = now.With(*row.SigninTime).BeginningOfDay()
+
+			if currentRow > 3 {
+				currentRow++
 			}
-		} else {
-			subtotals[row.UserID].Sum += row.Total
+
+			cell := "A" + strconv.FormatInt(currentRow, 10)
+			if row.SigninTime == nil {
+				f.SetCellValue(currentSheet, cell, "NULL")
+			} else {
+				f.SetCellValue(currentSheet, cell, row.SigninTime.Format("2006-01-02"))
+			}
+
+			var styleId int
+			styleId, err = f.NewStyle(`{"fill":{"type":"pattern","color":["#FFFF00"],"pattern":1}}`)
+			f.SetCellStyle(currentSheet, cell, "E"+strconv.FormatInt(currentRow, 10), styleId)
+
+			currentRow++
 		}
-		current++
+
+		f.SetCellValue(currentSheet, "A"+strconv.FormatInt(currentRow, 10), row.SigninTime.Weekday())
+		f.SetCellValue(currentSheet, "B"+strconv.FormatInt(currentRow, 10), row.Name)
+		if row.SigninTime == nil {
+			f.SetCellValue(currentSheet, "C"+strconv.FormatInt(currentRow, 10), "NULL")
+		} else {
+			f.SetCellValue(currentSheet, "C"+strconv.FormatInt(currentRow, 10), row.SigninTime.Format("2006-01-02"))
+		}
+		if row.SignoutTime == nil {
+			f.SetCellValue(currentSheet, "D"+strconv.FormatInt(currentRow, 10), "NULL")
+		} else {
+			f.SetCellValue(currentSheet, "D"+strconv.FormatInt(currentRow, 10), row.SignoutTime.Format("2006-01-02"))
+		}
+		f.SetCellValue(currentSheet, "E"+strconv.FormatInt(currentRow, 10), row.Total)
+
+		f.SetCellStyle(currentSheet, "A"+strconv.FormatInt(currentRow, 10), "E"+strconv.FormatInt(currentRow, 10), styleGridId)
+
+		currentRow++
 	}
-	current += 1
-	f.SetCellValue("Sheet1", "C"+strconv.FormatInt(current, 10), "Total")
-	current += 1
-	for _, subtotal := range subtotals {
-		f.SetCellValue("Sheet1", "B"+strconv.FormatInt(current, 10), subtotal.Name)
-		f.SetCellValue("Sheet1", "C"+strconv.FormatInt(current, 10), subtotal.Sum)
-		current++
+
+	var replaceNumer int64 = 1
+	for i := weekNumber; i > 0; i-- {
+		f.SetSheetName("Week "+strconv.FormatInt(i, 10), "Week #"+strconv.FormatInt(replaceNumer, 10))
+		replaceNumer++
 	}
+
+	return
 }

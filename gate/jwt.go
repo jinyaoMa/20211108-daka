@@ -9,7 +9,6 @@ import (
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID   uint
-	StoreID  int
 	Usertype string
 }
 

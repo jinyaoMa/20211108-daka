@@ -10,11 +10,37 @@ info:
   title: gin-systray-starter
   version: 1.0.0
 paths:
-  /test/checkToken/:
+  /auth/login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Login
+      parameters:
+      - description: Account
+        in: formData
+        name: account
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ ok , data , token }'
+        "404":
+          description: '{ error }'
+      summary: Login
+      tags:
+      - Before Authorization
+  /stores/list:
     get:
       consumes:
       - text/plain
-      description: Test Jwt, check token
+      description: Get Stores List
       parameters:
       - description: Authorization
         in: header
@@ -24,31 +50,142 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{ ok , claims }'
+          description: '{ ok , data }'
+        "404":
+          description: '{ error }'
+      security:
+      - BearerIdAuth: []
+      summary: GetStoresList
+      tags:
+      - Before Authorization
+  /timesheet/download:
+    get:
+      consumes:
+      - text/plain
+      description: Download Excel
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: Store ID
+        in: query
+        name: storeId
+        type: integer
+      - description: Start Date
+        in: query
+        name: startDate
+        required: true
+        type: string
+      - description: End Date
+        in: query
+        name: endDate
+        required: true
+        type: string
+      - description: Is All
+        in: query
+        name: all
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: .xlsx file
         "401":
           description: Auth failed
         "404":
           description: '{ error }'
       security:
       - BearerIdAuth: []
-      summary: TestJwtCheckToken
+      summary: DownloadExcel
       tags:
       - After Authorization
-  /test/getToken/:
+  /timesheet/list:
     get:
       consumes:
-      - text/plain
-      description: Test Jwt, get token
+      - application/json
+      description: Get Timesheet List
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: Store ID
+        in: query
+        name: storeId
+        type: integer
+      - description: Show Date
+        in: query
+        name: showDate
+        type: string
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Order
+        in: query
+        name: order
+        type: string
+      - description: OrderBy
+        in: query
+        name: orderby
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: '{ ok , token }'
+          description: '{ ok , data , count }'
+        "401":
+          description: Auth failed
         "404":
           description: '{ error }'
-      summary: TestJwtGetToken
+      security:
+      - BearerIdAuth: []
+      summary: GetTimesheetList
       tags:
-      - Before Authorization
+      - After Authorization
+  /timesheet/update/:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Update Timesheet
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: Store ID
+        in: query
+        name: StoreID
+        type: integer
+      - description: ID
+        in: formData
+        name: ID
+        required: true
+        type: integer
+      - description: Total
+        in: formData
+        name: Total
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ ok }'
+        "401":
+          description: Auth failed
+        "404":
+          description: '{ error }'
+      security:
+      - BearerIdAuth: []
+      summary: UpdateTimesheet
+      tags:
+      - After Authorization
 securityDefinitions:
   BearerIdAuth:
     in: header

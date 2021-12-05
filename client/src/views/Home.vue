@@ -1,8 +1,11 @@
 <template>
   <el-container class="home">
     <el-header>
-      <el-button type="danger" @click="logout">Logout</el-button>
-      <div class="storename">(in {{ storename }})</div>
+      <el-button-group>
+        <el-button type="warning" @click="changeStore">Change Store</el-button>
+        <el-button type="danger" @click="logout">Logout</el-button>
+      </el-button-group>
+      <div class="storename">(in {{ storename }}, {{ showDate }})</div>
       <div class="username">{{ username }}</div>
     </el-header>
     <el-main>
@@ -113,16 +116,14 @@
       >
       </el-pagination>
       <div class="export">
-        <div class="label">Number of weeks to export</div>
-        <el-input-number
-          v-model="weeksToExport"
-          :precision="0"
-          :step="1"
-        ></el-input-number>
         <el-button type="success" @click="downloadExcel">
           Export .xlsx
         </el-button>
-        <a ref="download" style="display: none" download="export.xlsx"></a>
+        <a
+          ref="download"
+          style="display: none"
+          :download="downloadFilename"
+        ></a>
       </div>
     </el-main>
   </el-container>
@@ -133,6 +134,11 @@
 
 export default {
   name: "Home",
+  props: {
+    showDate: {
+      type: String,
+    },
+  },
   data() {
     return {
       username: "",
@@ -144,7 +150,7 @@ export default {
       count: 0,
       tableData: [],
       tableDataChange: [],
-      weeksToExport: 1,
+      downloadFilename: "",
     };
   },
   mounted() {
@@ -158,6 +164,13 @@ export default {
     this.storename = userInfo.store.name;
     this.usertype = userInfo.user.type;
 
+    if (this.showDate == "All") {
+      this.downloadFilename = userInfo.store.name + "_all.xlsx";
+    } else {
+      this.downloadFilename =
+        userInfo.store.name + "_" + this.showDate + ".xlsx";
+    }
+
     this.loadList();
   },
   methods: {
@@ -166,6 +179,8 @@ export default {
       this.$http
         .get("/timesheet/list", {
           params: {
+            storeId: userInfo.store.id,
+            showDate: this.showDate,
             offset: this.offset,
             limit: this.limit,
             order: order.startsWith("asc") ? "asc" : "desc",
@@ -189,6 +204,9 @@ export default {
       this.saveUserInfo({});
       this.$router.push("/login");
     },
+    changeStore() {
+      this.$router.push("/store");
+    },
     handleEdit(row) {
       row.isEdit = true;
     },
@@ -205,11 +223,15 @@ export default {
     handleUpdate(row) {
       const userInfo = this.getUserInfo();
       this.$http
-        .post("/timesheet/update", row, {
-          headers: {
-            Authorization: userInfo.token,
-          },
-        })
+        .post(
+          "/timesheet/update",
+          { ...row, StoreID: userInfo.store.id },
+          {
+            headers: {
+              Authorization: userInfo.token,
+            },
+          }
+        )
         .then((result) => {
           if (result.data.ok) {
             this.$message({
@@ -230,7 +252,11 @@ export default {
       this.$http
         .get("/timesheet/download", {
           params: {
-            week: this.weeksToExport,
+            storeId: userInfo.store.id,
+            startDate: this.showDate,
+            endDate: this.showDate,
+            all: this.showDate == "All",
+            r: Math.random(),
           },
           responseType: "blob",
           headers: {

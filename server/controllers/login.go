@@ -15,7 +15,6 @@ import (
 type LoginForm struct {
 	Account  string `form:"account" binding:"required"`
 	Password string `form:"password" binding:"required"`
-	StoreId  int    `form:"storeId"`
 }
 
 // @Summary Login
@@ -25,7 +24,6 @@ type LoginForm struct {
 // @Produce json
 // @param account formData string true "Account"
 // @param password formData string true "Password"
-// @param storeId formData int false "Store ID"
 // @Success 200 "{ ok , data , token }"
 // @Failure 404 "{ error }"
 // @Router /auth/login [post]
@@ -56,24 +54,9 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	store, ok := database.GetStore(form.StoreId)
-	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Store error!",
-		})
-		return
-	}
-
 	if !(usertype.Name == "Admin" || usertype.Name == "Office" || usertype.Name == "Account") {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Usertype " + usertype.Name + " is unavailable!",
-		})
-		return
-	}
-
-	if usertype.Name == "Office" && form.StoreId == database.OFFICE_EXCEPT_INDEX {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Office users are denied to access store " + store.Name + "!",
 		})
 		return
 	}
@@ -96,7 +79,6 @@ func Login(c *gin.Context) {
 			},
 		},
 		UserID:   user.ID,
-		StoreID:  form.StoreId,
 		Usertype: usertype.Name,
 	}
 
@@ -114,10 +96,6 @@ func Login(c *gin.Context) {
 			"user": gin.H{
 				"name": user.Account,
 				"type": usertype.Name,
-			},
-			"store": gin.H{
-				"id":   form.StoreId,
-				"name": store.Name,
 			},
 		},
 		"token": token,

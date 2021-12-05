@@ -12,6 +12,8 @@ import (
 // @Tags Before Authorization
 // @accept plain
 // @Produce json
+// @Security BearerIdAuth
+// @param Authorization header string false "Authorization"
 // @Success 200 "{ ok , data }"
 // @Failure 404 "{ error }"
 // @Router /stores/list [get]

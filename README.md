@@ -6,7 +6,8 @@
 # 测试
 
 - 运行`npm run setup:all`
-- 运行`npm run serve:all`
+- 运行`npm run serve:front`
+- 运行`npm run serve:back`
 - 浏览器打开：`http://localhost:8080`
 
 # 数据库
