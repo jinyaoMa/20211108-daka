@@ -9,6 +9,7 @@
 - 运行`npm run serve:front`
 - 运行`npm run serve:back`
 - 浏览器打开：`http://localhost:8080`
+- Swagger打开：`http://localhost:8081/swagger/index.html`
 
 # 数据库
 
