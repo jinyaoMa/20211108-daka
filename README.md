@@ -5,6 +5,8 @@
 
 # 测试
 
+- 运行`curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin`
+- 运行`go install github.com/swaggo/swag/cmd/swag@latest`
 - 运行`npm run setup:all`
 - 运行`npm run serve:front`
 - 运行`npm run serve:back`
