@@ -32,7 +32,7 @@
               :class="data.isSelected ? 'dateCell is-selected' : 'dateCell'"
               @click="showDate(date)"
             >
-              {{ data.day.split("-")[2].replace("0", "") }}
+              {{ data.day.split("-")[2] }}
             </div>
           </template>
         </el-calendar>
