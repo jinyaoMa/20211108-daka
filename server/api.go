@@ -28,6 +28,7 @@ func Apis(engine *gin.Engine, withSwagger bool) {
 	routers.Auth(engine)
 	routers.Stores(engine)
 	routers.Timesheet(engine)
+	routers.User(engine)
 
 	if withSwagger {
 		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

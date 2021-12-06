@@ -1,8 +1,11 @@
 <template>
   <el-container class="store">
     <el-header>
-      <el-button type="danger" @click="logout">Logout</el-button>
-      <div class="username">{{ username }}</div>
+      <div class="title">Twtrade Timesheet Tool</div>
+      <div class="right">
+        <div class="username">{{ username }}</div>
+        <el-button type="danger" @click="logout">Logout</el-button>
+      </div>
     </el-header>
     <el-main>
       <el-form class="form" ref="form">
@@ -16,7 +19,7 @@
             >
             </el-option>
           </el-select>
-          <el-button class="margin-lr-10" type="success" @click="viewAll">
+          <el-button class="margin-l-20" type="success" @click="viewAll">
             View All
           </el-button>
         </el-form-item>
@@ -34,21 +37,40 @@
           </template>
         </el-calendar>
       </div>
-      <div v-if="canExport" class="export">
-        <span class="el-form-item__label">Export from</span>
-        <el-date-picker
-          v-model="exportStart"
-          type="date"
-          placeholder="Start Date"
-        >
-        </el-date-picker>
-        <span class="margin-lr-10 custom-label">To</span>
-        <el-date-picker v-model="exportEnd" type="date" placeholder="End Date">
-        </el-date-picker>
-        <el-button class="margin-lr-10" type="primary" @click="downloadExcel">
-          Export .xlsx
-        </el-button>
-        <a ref="download" style="display: none" download="export.xlsx"></a>
+      <div class="export">
+        <el-form label-width="100px">
+          <el-form-item label="Export from">
+            <el-date-picker
+              v-model="exportStart"
+              type="date"
+              placeholder="Start Date"
+            >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="To">
+            <el-date-picker
+              v-model="exportEnd"
+              type="date"
+              placeholder="End Date"
+            >
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="downloadExcel">
+              Export .xlsx
+            </el-button>
+          </el-form-item>
+          <a
+            ref="download"
+            style="display: none"
+            :download="downloadFilename"
+          ></a>
+        </el-form>
+        <div v-if="canAddUser">
+          <el-button class="margin-l-20" type="success" @click="handleAddUser">
+            Add User
+          </el-button>
+        </div>
       </div>
     </el-main>
   </el-container>
@@ -69,7 +91,6 @@ export default {
     };
   },
   mounted() {
-    console.log(this);
     const userInfo = this.getUserInfo();
     if (typeof userInfo.token !== "string" || userInfo.token == "") {
       this.$router.replace("/login");
@@ -89,7 +110,16 @@ export default {
         },
       })
       .then((result) => {
-        this.storeslist = result.data.data;
+        const list = result.data.data;
+        if (userInfo.user.type == "Office") {
+          this.storeslist = list
+            .slice(0, this.OFFICE_EXCEPT_INDEX)
+            .concat(list.slice(this.OFFICE_EXCEPT_INDEX + 1));
+        } else {
+          this.storeslist = list;
+        }
+        userInfo.store.name = this.storeslist[parseInt(this.storeId)];
+        this.saveUserInfo(userInfo);
       });
   },
   watch: {
@@ -110,9 +140,20 @@ export default {
     },
   },
   computed: {
-    canExport() {
-      return !(
-        this.usertype == "Office" && this.OFFICE_EXCEPT_INDEX == this.storeId
+    canAddUser() {
+      return (
+        this.storeId == 0 &&
+        (this.usertype == "Admin" || this.usertype == "Office")
+      );
+    },
+    downloadFilename() {
+      return (
+        this.storeslist[parseInt(this.storeId)] +
+        "_" +
+        this.date2YMD(this.exportStart) +
+        "_" +
+        this.date2YMD(this.exportEnd) +
+        ".xlsx"
       );
     },
   },
@@ -175,6 +216,9 @@ export default {
           }
         });
     },
+    handleAddUser() {
+      this.$router.push("/adduser");
+    },
   },
 };
 </script>
@@ -184,10 +228,12 @@ export default {
   header {
     border-bottom: 2px solid;
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     .storename,
-    .username {
+    .username,
+    .title {
       margin-top: 0.2rem;
     }
     .storename {
@@ -196,15 +242,36 @@ export default {
     .username {
       margin-right: 0.5rem;
     }
+    .title {
+      font-size: 1.5em;
+      text-align: center;
+    }
+    .right {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    @media (max-width: 512px) {
+      flex-direction: column;
+      height: auto !important;
+    }
   }
   main {
     max-width: 1024px;
-    margin: 0 calc(50vw - 512px);
+    margin: 0 auto;
+    .export {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      @media (max-width: 512px) {
+        flex-direction: column;
+        gap: 20px;
+      }
+    }
   }
 }
-.margin-lr-10 {
-  margin-left: 10px;
-  margin-right: 10px;
+.margin-l-20 {
+  margin-left: 20px;
 }
 .custom-label {
   vertical-align: middle;

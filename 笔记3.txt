@@ -1,0 +1,9 @@
+Excel: > 改名字， > 顺序排列日期
+> 登录和日期页面，加名字  （Twtrade Timesheet Tool）
+
+> View all => export 删除这个按钮
+
+> CSS 文件 更改到 自适应窗口 
+
+
+

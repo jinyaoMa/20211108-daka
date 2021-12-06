@@ -28,7 +28,14 @@ body {
 }
 
 .el-calendar-table .el-calendar-day {
-  height: 72px !important;
   padding: 0 !important;
+}
+
+@media (max-width: 512px) {
+  .el-calendar__header,
+  .el-calendar__body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
 }
 </style>

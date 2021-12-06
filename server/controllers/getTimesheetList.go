@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"this/database"
 	"this/database/models"
+	"this/gate"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,21 +36,26 @@ type GetTimesheetListQuery struct {
 // @Failure 404 "{ error }"
 // @Router /timesheet/list [get]
 func GetTimesheetList(c *gin.Context) {
-	/*
-		temp, exists := c.Get("claims")
-		if !exists {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "Middleware Auth not exists!",
-			})
-			return
-		}
-		claims := temp.(*gate.Claims)
-	*/
+	temp, exists := c.Get("claims")
+	if !exists {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Middleware Auth not exists!",
+		})
+		return
+	}
+	claims := temp.(*gate.Claims)
 
 	var form GetTimesheetListQuery
 	if c.ShouldBind(&form) != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Check for empty fields!",
+		})
+		return
+	}
+
+	if claims.Usertype == "Office" && form.StoreID == database.OFFICE_EXCEPT_INDEX {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Usertype Office denied by store!",
 		})
 		return
 	}

@@ -1,5 +1,6 @@
 <template>
   <div class="login">
+    <div class="title">Twtrade Timesheet Tool</div>
     <el-form
       class="form"
       ref="form"
@@ -67,6 +68,11 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  .title {
+    line-height: 3;
+    font-size: 1.8em;
+    font-weight: bold;
+  }
 }
 .form {
   box-sizing: border-box;

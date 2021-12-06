@@ -70,8 +70,8 @@ func (t *Timesheet) GetListByOffsetLimitAll(store database.Store, offset int, li
 func (t *Timesheet) GetTotalForExcelWithRange(store database.Store, startDate string, endDate string) (excelTotals []*ExcelTotal, err error) {
 	result := store.DB.
 		Table("timesheet").
-		Order("timesheet.signintime1 desc").
-		Select("CONCAT(users.firstname,' ',users.lastname) as fullname, SUM(timesheet.total) as hours").
+		Order("fullname asc").
+		Select("CONCAT(if(users.firstname is null,'',users.firstname),' ',if(users.lastname is null,'',users.lastname)) as fullname, SUM(timesheet.total) as hours").
 		Where("date(timesheet.signintime1) between ? and ?", startDate, endDate).
 		Joins("JOIN users ON users.userid = timesheet.userid").
 		Group("users.userid").
@@ -83,8 +83,8 @@ func (t *Timesheet) GetTotalForExcelWithRange(store database.Store, startDate st
 func (t *Timesheet) GetListForExcelWithRange(store database.Store, startDate string, endDate string) (timesheets []*ExcelTimesheet, err error) {
 	result := store.DB.
 		Table("timesheet").
-		Order("timesheet.signintime1 desc").
-		Select("timesheet.signintime1, timesheet.signouttime1, timesheet.total, CONCAT(users.firstname,' ',users.lastname) as fullname").
+		Order("timesheet.signintime1 asc").
+		Select("timesheet.signintime1, timesheet.signouttime1, timesheet.total, CONCAT(if(users.firstname is null,'',users.firstname),' ',if(users.lastname is null,'',users.lastname)) as fullname").
 		Where("date(timesheet.signintime1) between ? and ?", startDate, endDate).
 		Joins("JOIN users ON users.userid = timesheet.userid").
 		Scan(&timesheets)

@@ -274,7 +274,7 @@ var doc = `{
                         "type": "integer",
                         "description": "Store ID",
                         "name": "StoreID",
-                        "in": "query"
+                        "in": "formData"
                     },
                     {
                         "type": "integer",
@@ -287,6 +287,79 @@ var doc = `{
                         "type": "number",
                         "description": "Total",
                         "name": "Total",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{ ok }"
+                    },
+                    "401": {
+                        "description": "Auth failed"
+                    },
+                    "404": {
+                        "description": "{ error }"
+                    }
+                }
+            }
+        },
+        "/user/add/": {
+            "post": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Add User",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "AddUser",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Store ID",
+                        "name": "StoreID",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "First Name",
+                        "name": "firstname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Last Name",
+                        "name": "lastname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User Type",
+                        "name": "usertype",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
                         "in": "formData",
                         "required": true
                     }

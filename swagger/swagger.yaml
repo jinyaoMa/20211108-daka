@@ -159,7 +159,7 @@ paths:
         name: Authorization
         type: string
       - description: Store ID
-        in: query
+        in: formData
         name: StoreID
         type: integer
       - description: ID
@@ -184,6 +184,54 @@ paths:
       security:
       - BearerIdAuth: []
       summary: UpdateTimesheet
+      tags:
+      - After Authorization
+  /user/add/:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Add User
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: Store ID
+        in: formData
+        name: StoreID
+        type: integer
+      - description: First Name
+        in: formData
+        name: firstname
+        required: true
+        type: string
+      - description: Last Name
+        in: formData
+        name: lastname
+        required: true
+        type: string
+      - description: User Type
+        in: formData
+        name: usertype
+        required: true
+        type: integer
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ ok }'
+        "401":
+          description: Auth failed
+        "404":
+          description: '{ error }'
+      security:
+      - BearerIdAuth: []
+      summary: AddUser
       tags:
       - After Authorization
 securityDefinitions:

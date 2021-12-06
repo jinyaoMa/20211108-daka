@@ -5,36 +5,35 @@ import (
 	"this/database"
 	"this/database/models"
 	"this/gate"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-type UpdateTimesheetForm struct {
-	StoreID     int       `form:"StoreID"`
-	ID          uint      `form:"ID" binding:"required"`
-	SigninTime  time.Time `form:"SigninTime" binding:"required"`
-	SignoutTime time.Time `form:"SignoutTime" binding:"required"`
-	Total       float64   `form:"Total" binding:"required"`
+type AddUserForm struct {
+	StoreID   int    `form:"StoreID"`
+	Firstname string `form:"firstname" binding:"required"`
+	Lastname  string `form:"lastname" binding:"required"`
+	Usertype  uint   `form:"usertype" binding:"required"`
+	Password  string `form:"password" binding:"required"`
 }
 
-// @Summary UpdateTimesheet
-// @Description Update Timesheet
+// @Summary AddUser
+// @Description Add User
 // @Tags After Authorization
 // @accept x-www-form-urlencoded
 // @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
 // @param StoreID formData int false "Store ID"
-// @param ID formData uint true "ID"
-// @param SigninTime formData time.Time true "SigninTime"
-// @param SignoutTime formData time.Time true "SignoutTime"
-// @param Total formData float64 true "Total"
+// @param firstname formData string true "First Name"
+// @param lastname formData string true "Last Name"
+// @param usertype formData uint true "User Type"
+// @param password formData string true "Password"
 // @Success 200 "{ ok }"
 // @Failure 401 "Auth failed"
 // @Failure 404 "{ error }"
-// @Router /timesheet/update/ [post]
-func UpdateTimesheet(c *gin.Context) {
+// @Router /user/add/ [post]
+func AddUser(c *gin.Context) {
 	temp, exists := c.Get("claims")
 	if !exists {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -51,7 +50,7 @@ func UpdateTimesheet(c *gin.Context) {
 		return
 	}
 
-	var form UpdateTimesheetForm
+	var form AddUserForm
 	if c.ShouldBind(&form) != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Check for empty fields!",
@@ -59,9 +58,9 @@ func UpdateTimesheet(c *gin.Context) {
 		return
 	}
 
-	if claims.Usertype == "Office" && form.StoreID == database.OFFICE_EXCEPT_INDEX {
+	if form.StoreID != database.WAREHOUSE_INDEX {
 		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Usertype Office denied by store!",
+			"error": "Store is not WAREHOUSE!",
 		})
 		return
 	}
@@ -74,11 +73,11 @@ func UpdateTimesheet(c *gin.Context) {
 		return
 	}
 
-	var timesheet *models.Timesheet
-	_, err := timesheet.UpdateById(*store, form.ID, form.SigninTime, form.SignoutTime, form.Total)
+	var user *models.User
+	err := user.AddUser(*store, form.Firstname, form.Lastname, form.Password, form.Usertype)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Timesheet error!",
+			"error": "AddUser error!",
 		})
 		return
 	}

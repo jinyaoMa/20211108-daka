@@ -19,6 +19,10 @@
   - `MAIN` - 登录 user 表
   - `STORES` - 所有店铺链接
   - `OFFICE_EXCEPT_INDEX` - Office 用户不能用的链接，对应`STORES`下标
+    - 同时修改`/client/src/mixin.js`中的`OFFICE_EXCEPT_INDEX`
+  - `WAREHOUSE_INDEX` - AddUser 功能指定只能 Warehouse 使用，默认为`0`
+- `Warehouse` ? 如果`WAREHOUSE_INDEX=0`，则所有`Warehouse`必须为index`0`
+  - 如果改了，还要改这里`/client/src/view/Store.vue`的`computed->canAddUser`
 
 # 网站端口修改
 

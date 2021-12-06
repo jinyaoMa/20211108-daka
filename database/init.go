@@ -29,6 +29,7 @@ var STORES = []*Store{
 	},
 }
 
+var WAREHOUSE_INDEX = 0     // e.g. index of warehouse for addUser
 var OFFICE_EXCEPT_INDEX = 1 // e.g. office users cannot access to Store 1
 
 func GetStore(index int) (store *Store, ok bool) {

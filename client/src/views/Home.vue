@@ -1,12 +1,17 @@
 <template>
   <el-container class="home">
     <el-header>
-      <el-button-group>
-        <el-button type="warning" @click="changeStore">Change Store</el-button>
-        <el-button type="danger" @click="logout">Logout</el-button>
-      </el-button-group>
-      <div class="storename">(in {{ storename }}, {{ showDate }})</div>
-      <div class="username">{{ username }}</div>
+      <div class="title">Twtrade Timesheet Tool</div>
+      <div class="right">
+        <div class="username">{{ username }}</div>
+        <div class="storename">(in {{ storename }}, {{ showDate }})</div>
+        <el-button-group>
+          <el-button type="warning" @click="changeStore">
+            Change Store
+          </el-button>
+          <el-button type="danger" @click="logout">Logout</el-button>
+        </el-button-group>
+      </div>
     </el-header>
     <el-main>
       <el-table :data="tableData" @sort-change="handleSortChange">
@@ -115,7 +120,7 @@
         :total="count"
       >
       </el-pagination>
-      <div class="export">
+      <div v-if="count > 0" class="export">
         <el-button type="success" @click="downloadExcel">
           Export .xlsx
         </el-button>
@@ -281,10 +286,12 @@ export default {
   header {
     border-bottom: 2px solid;
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
     .storename,
-    .username {
+    .username,
+    .title {
       margin-top: 0.2rem;
     }
     .storename {
@@ -292,6 +299,24 @@ export default {
     }
     .username {
       margin-right: 0.5rem;
+    }
+    .title {
+      font-size: 1.5em;
+      text-align: center;
+    }
+    .right {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    @media (max-width: 800px) {
+      flex-direction: column;
+      height: auto !important;
+    }
+    @media (max-width: 520px) {
+      .right {
+        flex-direction: column;
+      }
     }
   }
   main {

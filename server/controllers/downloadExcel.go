@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"this/database"
 	"this/database/models"
+	"this/gate"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -35,21 +36,26 @@ type DownloadExcelQuery struct {
 // @Failure 404 "{ error }"
 // @Router /timesheet/download [get]
 func DownloadExcel(c *gin.Context) {
-	/*
-		temp, exists := c.Get("claims")
-		if !exists {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "Middleware Auth not exists!",
-			})
-			return
-		}
-		claims := temp.(*gate.Claims)
-	*/
+	temp, exists := c.Get("claims")
+	if !exists {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Middleware Auth not exists!",
+		})
+		return
+	}
+	claims := temp.(*gate.Claims)
 
 	var form DownloadExcelQuery
 	if c.ShouldBind(&form) != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Check for empty fields!",
+		})
+		return
+	}
+
+	if claims.Usertype == "Office" && form.StoreID == database.OFFICE_EXCEPT_INDEX {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Usertype Office denied by store!",
 		})
 		return
 	}
@@ -273,11 +279,13 @@ func makeExcelNewSheet(f *excelize.File, list []*models.ExcelTimesheet) (err err
 		currentRow++
 	}
 
-	var replaceNumer int64 = 1
-	for i := weekNumber; i > 0; i-- {
-		f.SetSheetName("Week "+strconv.FormatInt(i, 10), "Week #"+strconv.FormatInt(replaceNumer, 10))
-		replaceNumer++
-	}
+	/*
+		var replaceNumer int64 = 1
+		for i := weekNumber; i > 0; i-- {
+			f.SetSheetName("Week "+strconv.FormatInt(i, 10), "Week #"+strconv.FormatInt(replaceNumer, 10))
+			replaceNumer++
+		}
+	*/
 
 	return
 }
